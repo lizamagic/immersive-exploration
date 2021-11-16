@@ -86,6 +86,7 @@ def place_road(origin, x, corner, y):
     
     
 def place_block(x, y, f_count, s_count, step):
+    shapes = []
     for i in range(f_count):
         coordinate = rs.CreatePoint(x + i * step, y + 0, 0)
         shapes.append(place_shape(coordinate, step,\
@@ -101,63 +102,66 @@ def place_block(x, y, f_count, s_count, step):
         coordinate = rs.CreatePoint(x + step * (f_count - 1), y + i * step, 0)
         shapes.append(place_shape(coordinate, step,\
                                   (HEIGHT_LOWER, HEIGHT_HIGHER)))
+                                  
+    return shapes
+                                  
+def place_grid(x, y):
+    shapes = []
+    x_offset = obj_size * f_count
+    y_offset = obj_size * s_count
+
+    for i in range(city_width):
+        start_x = x + i * x_offset + i * ROAD_SIZE
+        for j in range(city_length):
+            start_y = y + j * y_offset + j * ROAD_SIZE
+            block = place_block(start_x, start_y, f_count, s_count, obj_size)
+            shapes.append(block)
+            if (j != city_length - 1):
+                place_road((x, start_y + y_offset, 0),
+                           (x, start_y + y_offset + ROAD_SIZE, 0), 
+                           (x + city_width * x_offset + (city_width - 1) * ROAD_SIZE, start_y + y_offset + ROAD_SIZE, 0),
+                           (x + city_width * x_offset + (city_width - 1) * ROAD_SIZE, start_y + y_offset, 0))
+        if (i != city_width - 1):
+            place_road((start_x + x_offset, y, 0), 
+                       (start_x + x_offset + ROAD_SIZE, y ,0),
+                       (start_x + x_offset + ROAD_SIZE, y + city_length * y_offset + (city_length - 1) * ROAD_SIZE, 0),
+                       (start_x + x_offset, y + city_length * y_offset + (city_length - 1) * ROAD_SIZE, 0))
+                                  
+def get_integer_loop(phrase, minimum, maximum):
+    int = rs.GetInteger(phrase)
+    
+    while (int < minimum or int > maximum):
+        print("Please check your input parameters.")
+        int = rs.GetInteger(phrase)
+        
+    return int
 
 All = rs.AllObjects()
 rs.DeleteObjects(All)
 
 # Error messages added 11.1.21
+# Constrains added 11.7.21
 
-obj_size = rs.GetInteger("Please, provide the object size (From 20 to 500).")
+obj_size = get_integer_loop("Please, provide the object size (From 20 to 500).", 20, 500)
 
-if obj_size < 20 or obj_size > 500:
-    print("Please check your input parameters.")
-    exit()
+f_count = get_integer_loop("Please, provide the first object count (From 2 to 50).", 2, 50)
 
-f_count = rs.GetInteger("Please, provide the first object count (From 2 to 50).")
+s_count = get_integer_loop("Please, provide the second object count (From 2 to 50).", 2, 50)
 
-if f_count < 2 or obj_size > 50:
-    print("Please check your input parameters.")
-    exit()
+city_width = get_integer_loop("Please, provide city width (Number of blocks 1 - 30.", 1, 30)
 
-s_count = rs.GetInteger("Please, provide the second object count (From 2 to 50).")
-
-if s_count < 2 or obj_size > 50:
-    print("Please check your input parameters.")
-    exit()
-
-city_width = rs.GetInteger("Please, provide city width (Number of blocks 1-30.")
-
-if city_width < 1 or obj_size > 30:
-    print("Please check your input parameters.")
-    exit()
-
-city_length = rs.GetInteger("Please, provide city length (Number of blocks 1-30.")
-
-if city_length < 1 or obj_size > 30:
-    print("Please check your input parameters.")
-    exit()
+city_length = get_integer_loop("Please, provide city length (Number of blocks 1 - 30.", 1, 30)
 
 # Count changed to first and second in order to produce rectangular blocks 11.1.21
 
-shapes = []
-x_offset = obj_size * f_count
-y_offset = obj_size * s_count
+print("Now select points that will serve as anchors for individual grids")
+grid_count = get_integer_loop("Please, the grid count (Number of grids 1 - 30).", 1, 30)
 
-for i in range(city_width):
-    start_x = i * x_offset + i * ROAD_SIZE
-    for j in range(city_length):
-        start_y = j * y_offset + j * ROAD_SIZE
-        place_block(start_x, start_y, f_count, s_count, obj_size)
-        if (j != city_length - 1):
-            place_road((0, start_y + y_offset, 0),
-                       (0, start_y + y_offset + ROAD_SIZE, 0), 
-                       (city_width * x_offset + (city_width - 1) * ROAD_SIZE, start_y + y_offset + ROAD_SIZE, 0),
-                       (city_width * x_offset + (city_width - 1) * ROAD_SIZE, start_y + y_offset, 0))
-    if (i != city_width - 1):
-        place_road((start_x + x_offset, 0, 0), 
-                   (start_x + x_offset + ROAD_SIZE, 0 ,0),
-                   (start_x + x_offset + ROAD_SIZE, city_length * y_offset + (city_length - 1) * ROAD_SIZE, 0),
-                   (start_x + x_offset, city_length * y_offset + (city_length - 1) * ROAD_SIZE, 0))
+# Grid Anchors added 11.7.21
 
+grid_anchors = []
+for i in range(grid_count):
+    point = rs.GetPoint("Anchor")
+    place_grid(point.X, point.Y)
 
 rs.ZoomExtents()
