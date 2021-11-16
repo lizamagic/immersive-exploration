@@ -16,6 +16,10 @@ CYL_RGB = ((88, 204), (56, 200), (76, 255))
 
 CIRC_RGB = ((173, 173), (216, 216), (220, 255))
 
+#11.15.21 Torus Added
+
+TOR_RGB = ((50, 52), (10, 26), (45, 255))
+
 ROAD_SIZE = 15
 
 
@@ -32,7 +36,7 @@ def gen_color(color_range):
     return rs.CreateColor((red, green, blue))
 
 def place_shape(coordinate, base, height_limits):
-    choice = random.randint(0, 3)
+    choice = random.randint(0, 4)
     height = random.randint(height_limits[0], height_limits[1])
     
     if (choice == 0):
@@ -67,10 +71,16 @@ def place_shape(coordinate, base, height_limits):
 
         color = gen_color(CIRC_RGB)
         color_object(shape, color)
+    elif (choice == 4):
+        shape = rs.AddTorus((coordinate[0] + base / 2, coordinate[1] + base /2, coordinate[2] + height - base / 2), \
+                             base / 2 - base / 6, base / 6)
+        color = gen_color(TOR_RGB)
+        color_object(shape, color)
     else:
         raise NotImplemented
             
     return shape
+
     
 def place_road(origin, x, corner, y):
     point1 = rs.AddPoint(origin)
