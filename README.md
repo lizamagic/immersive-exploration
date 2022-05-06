@@ -10,5 +10,5 @@ stacked in a variety of ways if there are any new needs or constraints arising i
 ## Intstallation instructions
 
 - **Download the plug-in file** 
-- **Run the installer:** 
-- **Go ahead and open Rhino to start creating your personalized design space:** 
+- **Run the installer** 
+- **Go ahead and open Rhino to start creating your personalized design space* 
